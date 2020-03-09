@@ -1,0 +1,99 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Websocket Demo</title>
+</head>
+<body>
+Websocket Demo
+<br/><br/><br/>
+<hr>
+用户名：<input id="username" type="text" /><button id="login">登录</button>
+
+<hr>
+<br/><br/><br/>
+<button id="ws">创建连接</button>
+<button id="close">关闭连接</button>
+
+<br/><br/><br/>
+<hr>
+请输入：<textarea rows="5" cols="10" id="inputMsg" name="inputMsg"></textarea>
+<button onclick="doSend();">发送</button>
+
+</body>
+</html>
+<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="js/sockjs.min.js"></script>
+<script type="text/javascript">
+    var websocket = null;
+
+    function connect() {
+        if ('WebSocket' in window) {//判断浏览器是否支持WebSocket
+            //websocket = new WebSocket("ws://localhost:8080/websocket/socketServer.do");
+            websocket = new WebSocket("ws://172.16.16.33:8080/websocket/socketServer.do");
+        }
+        else if ('MozWebSocket' in window) {
+            //websocket = new MozWebSocket("ws://localhost:8080/websocket/socketServer.do");
+            websocket = new MozWebSocket("ws://172.16.16.33:8080/websocket/socketServer.do");
+        }
+        else {
+            //websocket = new SockJS("http://localhost:8080/sockjs/socketServer.do");
+            websocket = new SockJS("http://172.16.16.33:8080/sockjs/socketServer.do");
+        }
+
+
+        websocket.onopen = onOpen;
+        websocket.onmessage = onMessage;
+        websocket.onerror = onError;
+        websocket.onclose = onClose;
+    }
+
+    function onOpen(result) {
+        alert("连接建立时触发:"+result.data);
+    }
+    function onMessage(result) {
+        alert("客户端接收服务端数据时触发:"+result.data);
+    }
+    function onError(result) {
+        alert("通信发生错误时触发:"+result.data);
+    }
+    function onClose(result) {
+        //websocket.onclose();
+        alert("连接关闭时触发:"+result.data);
+    }
+    //使用连接发送数据
+    function doSend() {
+        if (websocket.readyState == websocket.OPEN) {
+            var msg = document.getElementById("inputMsg").value;
+            websocket.send(msg);//调用后台handleTextMessage方法
+            alert("发送成功!");
+        } else {
+            alert("连接已关闭!");
+        }
+    }
+
+    $(function () {
+        $("#login").click(function () {
+            var username = $("#username").val();
+            if (!username){
+                alert("请输入用户名");
+                return;
+            }
+
+            $.ajax({
+                type: 'get',
+                async: false,
+                url: "http://172.16.16.33:8080/login?username="+username,
+                //data: { "id": id, "password": password, "role_id": role_id },
+                //dataType: 'text',
+                success: function (data) {
+                }
+            });
+        });
+        $("#ws").click(function () {
+            connect();
+        });
+        $("#close").click(function () {
+            websocket.close();
+        });
+    });
+</script>

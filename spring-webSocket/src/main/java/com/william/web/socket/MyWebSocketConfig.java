@@ -15,10 +15,10 @@ public class MyWebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 
         String websocket_url = "/websocket/socketServer.do";
-        registry.addHandler(new MyWebSocketHandler(), websocket_url).addInterceptors(new MyHandshakeInterceptor());
+        registry.addHandler(new MyWebSocketHandler(), websocket_url).setAllowedOrigins("*").addInterceptors(new MyHandshakeInterceptor());
 
         String sockjs_url = "/sockjs/socketServer.do";
-        registry.addHandler(new MyWebSocketHandler(), sockjs_url).addInterceptors(new MyHandshakeInterceptor()).withSockJS();
+        registry.addHandler(new MyWebSocketHandler(), sockjs_url).addInterceptors(new MyHandshakeInterceptor()).setAllowedOrigins("*").withSockJS();
 
     }
 }

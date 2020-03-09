@@ -1,9 +1,5 @@
-com\william\web\back\SpringWebSocketConfig.class
 com\william\web\socket\MyWebSocketHandler.class
 com\william\web\socket\App.class
 com\william\web\socket\MyWebSocketConfig.class
-com\william\web\back\SpringWebSocketHandlerInterceptor.class
-com\william\web\back\SpringWebSocketHandler.class
-com\william\web\back\WebSocketController.class
 com\william\web\socket\MyHandshakeInterceptor.class
 com\william\web\socket\MyWebSocketController.class

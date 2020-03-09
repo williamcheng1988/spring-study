@@ -27,12 +27,14 @@ public class MyWebSocketHandler extends AbstractWebSocketHandler {
         logger.info("已建立连接!");
 
         String userId = (String) session.getAttributes().get(USER_ID);
-        users.put(userId, session);
+        if (!users.containsKey(userId)) {
+            users.put(userId, session);
 
-        super.afterConnectionEstablished(session);
+            super.afterConnectionEstablished(session);
 
-        //System.out.println(userId + " 已上线!");
-        logger.info("{} 已上线!", userId);
+            //System.out.println(userId + " 已上线!");
+            logger.info("{} 已上线!", userId);
+        }
     }
 
     @Override
@@ -50,34 +52,40 @@ public class MyWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 
-        Thread.sleep(3000);
+        //Thread.sleep(2000);
 
-        String userId= (String) session.getAttributes().get(USER_ID);
+        String sendId= (String) session.getAttributes().get(USER_ID);
         //System.out.println(userId + "发来消息>>>" + message.getPayload());
-        logger.info("{} 发来消息>>>{}", userId, message.getPayload());
-        sendMessageToUser(userId, new TextMessage("已处理<" + userId + ">发来的消息：" + message.getPayload()));
+        logger.info("{} 发来消息>>>{}", sendId, message.getPayload());
+        sendMessageToUser(sendId, message.getPayload());
     }
 
     /**
      * 给某个用户发送消息
      *
-     * @param userId
+     * @param sendId
      * @param message
      */
-    public void sendMessageToUser(String userId, TextMessage message) {
-        for (String id : users.keySet()) {
-            if (id.equals(userId)) {
-                try {
-                    if (users.get(id).isOpen()) {
-                        //System.out.println("回复" + userId + "消息>>>" + message.getPayload());
-                        logger.info("回复 {} 消息>>>{}", userId, message.getPayload());
-                        users.get(id).sendMessage(message);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+    public void sendMessageToUser(String sendId, String message) {
+        for (String receiveId : users.keySet()) {
+            if (message.contains("<all>")) {
+                sendMsg(sendId, receiveId, message);
+            } else {
+                if (receiveId.equals(sendId)) {
+                    sendMsg(sendId, receiveId, message);
+                    break;
                 }
-                break;
             }
+        }
+    }
+
+    private void sendMsg(String sendId, String receiveId, String msg) {
+        try {
+            msg = "已处理<" + sendId + ">发来的消息：" + msg;;
+            logger.info("回复 {} 消息>>>{}", receiveId, msg);
+            users.get(receiveId).sendMessage(new TextMessage(msg));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
